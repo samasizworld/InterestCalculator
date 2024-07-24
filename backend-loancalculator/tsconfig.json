@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "allowJs": false,
+        "outDir": "./build",
+        "module": "commonjs", // imp
+        "sourceMap": true,
+        "esModuleInterop": true, //This option enables compatibility with CommonJS modules when 
+        //using ES6 module syntax. 
+        //It allows you to use import syntax to import CommonJS modules that use require.
+        "target": "ES6",
+        "noImplicitAny": true,
+        "resolveJsonModule": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,0 +1,57 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: loandb_postgres
+    env_file: .env
+    volumes:
+      - ~/loandb_postgres_data:/var/lib/postgresql/data
+    networks:
+      - lc
+    ports:
+      - "5436:5432"
+    restart: unless-stopped
+
+  loancalculatorapi:
+    build:
+      context: ./backend-loancalculator/.
+      dockerfile: Dockerfile
+    image: loancalculatorimage
+    container_name: loancalculatorapi
+    env_file: ./backend-loancalculator/.env
+    ports:
+      - "4400:4400"
+    restart: unless-stopped
+    networks:
+      - lc
+    volumes:
+      - ~/loancalculatorapilogs:/logger/notificationlogs
+    depends_on:
+      - postgres
+  loancalculatorportal:
+    build:
+      context: ./frontend-loancalculator/.
+      dockerfile: Dockerfile
+    image: loancalculatorportalimage
+    container_name: loancalculatorportal
+    ports:
+      - "4500:4500"
+    restart: unless-stopped
+    networks:
+      - lc
+  vaultserver:
+    image: hashicorp/vault
+    container_name: vaultserver
+    ports:
+      - "8200:8200"
+    env_file: .env
+    volumes:
+      - ~/vault_data:/vault/:rw
+    cap_add:
+      - IPC_LOCK
+    entrypoint: vault server -config /vault/config/config.hcl
+    networks:
+      - lc
+networks:
+  lc:
+    driver: bridge

@@ -1,0 +1,136 @@
+.form-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.date-picker {
+    margin-right: 10px;
+}
+
+.transaction-title {
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.add-more-button {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.transaction-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.transaction-item input {
+    margin-right: 10px;
+    flex: 1;
+}
+
+.transaction-buttons {
+    margin-left: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.save-button,
+.delete-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.save-button {
+    background-color: #4caf50;
+}
+
+.delete-button {
+    background-color: #f44336;
+}
+
+.button-group-bottom {
+    margin-top: 20px;
+}
+
+.button-group-bottom .save-button {
+    background-color: #007bff;
+    padding: 10px 20px;
+}
+/* Modal Content Styling */
+.modal-content {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto; /* Ensure horizontal scrolling if necessary */
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #444;
+    overflow-wrap: break-word; /* Prevent long words from causing overflow */
+}
+
+.modal-content-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    overflow-wrap: break-word; /* Prevent text overflow */
+    word-wrap: break-word; /* Support for older browsers */
+}
+
+.modal-content-label {
+    font-weight: bold;
+    color: #555;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word; /* Prevent label overflow */
+}
+
+.modal-content-value {
+    color: #777;
+    text-align: right;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word; /* Prevent value overflow */
+}

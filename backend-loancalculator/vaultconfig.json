@@ -1,0 +1,12 @@
+{
+  "APP_PORT": "***",
+  "DB_HOST": "***",
+  "DB_LOGGING": "***",
+  "DB_PORT": "****",
+  "LOAN_THRESHOLD_PERIOD": 90,
+  "POSTGRES_DB": "***",
+  "POSTGRES_PASSWORD": "***",
+  "POSTGRES_USER": "***",
+  "LOAN_INTEREST_RATE": 0.1,
+  "NO_OF_DAYS_IN_YEAR": 365
+}
