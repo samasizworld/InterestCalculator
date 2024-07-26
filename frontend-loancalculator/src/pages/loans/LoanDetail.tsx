@@ -53,11 +53,37 @@ const LoanDetail = () => {
     };
 
     const handleDateChange1 = (date: any) => {
+        if (date) {
+            const year = new Date(date).getFullYear();
+            const month = new Date(date).getMonth() + 1;
+            const day = new Date(date).getDate();
+            // steps
+            // datepicker sends date with 00:00:00 and timezone kathmandu 
+            // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
+
+            //  inorder to fix it, i make 5:45
+            // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
+            // value = new Date(`${year}-${month}-${day} 05:45:00`);
+            date = new Date(`${year}-${month}-${day} 12:00:00`);
+        }
         setLoan((l: any) => ({ ...l, LoanTakenDate: date }));
     };
 
     const handleDateChange = (date: any, index: number) => {
         setTransactions((prevTransactions: any[]) => {
+            if (date) {
+                const year = new Date(date).getFullYear();
+                const month = new Date(date).getMonth() + 1;
+                const day = new Date(date).getDate();
+                // steps
+                // datepicker sends date with 00:00:00 and timezone kathmandu 
+                // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
+
+                //  inorder to fix it, i make 5:45
+                // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
+                // value = new Date(`${year}-${month}-${day} 05:45:00`);
+                date = new Date(`${year}-${month}-${day} 12:00:00`);
+            }
             const updatedTransactions = [...prevTransactions];
             updatedTransactions[index] = { ...updatedTransactions[index], PaidDate: date };
             return updatedTransactions;
