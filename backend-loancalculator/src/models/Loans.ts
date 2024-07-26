@@ -17,7 +17,16 @@ export class Loans {
                     type: DataTypes.UUIDV4
                 },
                 amount: {
-                    type: DataTypes.NUMBER
+                    type: "NUMERIC",
+                    get() {
+                        const rawValue = this.getDataValue('amount');
+                        return rawValue ? parseFloat(rawValue as any) : null;
+                    },
+
+                    set(value: any) {
+                        value = parseFloat(value);
+                        this.setDataValue('amount', value);
+                    },
                 },
                 isamountpaid: {
                     type: DataTypes.BOOLEAN

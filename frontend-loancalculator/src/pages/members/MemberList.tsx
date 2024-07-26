@@ -34,6 +34,34 @@ const MemberList = () => {
     setQueryParams({ ...queryParams, search: e.target.value });
   };
 
+  const deleteMember = (memberId: string) => {
+
+    axios.delete(`${apiUrl}members/${memberId}`, {
+      headers: { "Content-Type": "application/json" }
+    })
+      .then((res) => {
+        console.log(res.data);
+        toast.success(`Member deleted.`);
+      })
+      .catch(err => {
+        console.log(err)
+        toast.error('Internal server error')
+      });
+
+    axios.get(`${apiUrl}members?search=${queryParams.search}&page=${queryParams.page}&pageSize=${queryParams.pageSize}&orderBy=${queryParams.orderBy}&orderDir=${queryParams.orderDir}`, {
+      headers: { "Content-Type": "application/json" }
+    })
+      .then((res) => {
+        const result = res.data;
+        setMembers(result);
+        setTotalCount(res.headers['x-count']);
+      })
+      .catch(err => {
+        console.log(err)
+        toast.error('Internal server error')
+      });
+  }
+
   const totalPageToShow = Math.ceil(total / queryParams.pageSize);
   const arr = [];
   for (let i = queryParams.page; i <= totalPageToShow; i++) {
@@ -74,7 +102,7 @@ const MemberList = () => {
                   <Link to={`/members/${member.MemberId}`}>View</Link>
                 </td>
                 <td>
-                  <button>Delete</button>
+                  <button onClick={() => deleteMember(member.MemberId)}>Delete</button>
                 </td>
               </tr>
             ))}

@@ -1,12 +1,18 @@
-import { Outlet } from "react-router-dom"
+import { useEffect } from "react"
+import { Outlet, useNavigate } from "react-router-dom"
 // import Navbar from "./components/Navbar"
 
 const App = () => {
-
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (location.pathname == '/') {
+      navigate('/members');
+    }
+  }, [])
   return (
     <>
-    {/* <Navbar></Navbar> */}
-    <Outlet></Outlet>
+      {/* <Navbar></Navbar> */}
+      <Outlet></Outlet>
     </>
   )
 }

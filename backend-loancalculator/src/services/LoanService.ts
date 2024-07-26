@@ -11,9 +11,13 @@ export class LoanService extends GeneralService<LoanModel> {
         this.loanModel = loanModel;
     }
 
-    async getLoans(search: string, pageSize: number, offset: number, orderBy: string, orderDir: string, key: string, value: any) {
+    async getLoans(search: string, pageSize: number, offset: number, orderBy: string, orderDir: string, key?: string, value?: any) {
         const obj = { key, value };
-        return await this.getLists(search, pageSize, offset, orderDir, orderBy, obj);
+        let searchQuery: any;
+        if (search) {
+            searchQuery = '';
+        }
+        return await this.getLists(searchQuery, pageSize, offset, orderDir, orderBy, obj);
     }
     async createLoan(model: LoanModel) {
         return await this.insert(model)

@@ -104,24 +104,40 @@ class LoanMapper {
     //         return { amount, interest: sumInterest, dueAmount: sumInterest - paidamount, liableAmount: 0 };
     //     }
     // }
+    checkDays(loan, transactions) {
+        var _a;
+        const lastPaidDate = (_a = transactions[transactions.length - 1]) === null || _a === void 0 ? void 0 : _a.PaidDate;
+        const currentDate = (0, moment_1.default)();
+        const initialDate = (0, moment_1.default)(lastPaidDate ? lastPaidDate : loan.loantakendate);
+        let noOfDays = currentDate.diff(initialDate, 'days');
+        if (noOfDays == 0) {
+            noOfDays = 0;
+        }
+        else {
+            noOfDays = noOfDays + 1;
+        }
+        if (noOfDays > 90) {
+            return true;
+        }
+        return false;
+    }
     interestMapper(loan, transactions) {
         var _a;
-        const amount = parseFloat(loan.amount);
         let dueAmountTotal = 0;
         let liableAmountTotal = 0;
         for (let i = 0; i < transactions.length; i++) {
             if (i == 0) {
-                const { dueAmount, liableAmount } = this.interestCalculator(amount, loan.loantakendate, transactions[i].PaidDate, transactions[i].PaidAmount);
+                const { dueAmount, liableAmount } = this.interestCalculator(loan.amount, loan.loantakendate, transactions[i].PaidDate, transactions[i].PaidAmount);
                 dueAmountTotal = dueAmountTotal + dueAmount;
                 liableAmountTotal = liableAmountTotal + liableAmount;
             }
             else {
-                const { liableAmount, dueAmount } = this.interestCalculator(amount, transactions[i - 1].PaidDate, transactions[i].PaidDate, transactions[i].PaidAmount);
+                const { liableAmount, dueAmount } = this.interestCalculator(loan.amount, transactions[i - 1].PaidDate, transactions[i].PaidDate, transactions[i].PaidAmount);
                 dueAmountTotal = dueAmountTotal + dueAmount;
                 liableAmountTotal = liableAmountTotal + liableAmount;
             }
         }
-        const principleAmount = dueAmountTotal + amount;
+        const principleAmount = dueAmountTotal + loan.amount;
         const latestPaidDate = (_a = transactions[transactions.length - 1]) === null || _a === void 0 ? void 0 : _a.PaidDate;
         console.log('Latest Paid date ', latestPaidDate);
         let I;
@@ -133,28 +149,26 @@ class LoanMapper {
             const { interest } = this.interestCalculator(principleAmount, loan.loantakendate, new Date(), 0);
             I = interest;
         }
-        I = Math.ceil(I);
-        dueAmountTotal = Math.ceil(dueAmountTotal);
-        liableAmountTotal = Math.ceil(liableAmountTotal);
-        let date;
-        let dayss;
-        if (transactions.length > 0 && liableAmountTotal) {
-            dayss = ((Math.log((amount + liableAmountTotal) / amount) / Math.log(1 + (0.1 / 4.06))) * 365) / 4.06;
-            dayss = Math.ceil(dayss);
-            date = (0, moment_1.default)(latestPaidDate).add(dayss, 'days').format('YYYY-MM-DD');
-        }
+        // let date;
+        // let dayss;
+        // if (transactions.length > 0 && liableAmountTotal) {
+        //     dayss = ((Math.log((loan.amount + liableAmountTotal) / loan.amount) / Math.log(1 + (0.1 / 4.06))) * 365) / 4.06;
+        //     dayss = Math.ceil(dayss)
+        //     date = moment(latestPaidDate).add(dayss, 'days').format('YYYY-MM-DD');
+        // }
         return {
             LoanId: loan.guid,
-            Principle: amount,
-            DueInterestAmount: dueAmountTotal,
-            InterestAmount: I,
-            LiableAmount: liableAmountTotal,
-            DatetoVoidLiableAmount: date,
-            NoofDaystoVoid: dayss,
-            LatestPaidDate: (0, moment_1.default)(latestPaidDate).format('YYYY-MM-DD'),
+            Principle: Math.round(loan.amount),
+            DueInterestAmount: Math.round(dueAmountTotal),
+            InterestAmount: Math.round(I),
+            LiableAmount: Math.round(liableAmountTotal),
+            // DatetoVoidLiableAmount: date,
+            // NoofDaystoVoid: dayss,
+            LatestPaidDate: latestPaidDate ? (0, moment_1.default)(latestPaidDate).format('YYYY-MM-DD') : null,
+            LoanTakenDate: loan.loantakendate ? (0, moment_1.default)(loan.loantakendate).format('YYYY-MM-DD') : null,
             // InterestAmount: liableAmountTotal > 0 ? (I < liableAmountTotal ? 0 : liableAmountTotal - I) : I,
             // LiableAmount: liableAmountTotal > 0 ? (liableAmountTotal > I ? liableAmountTotal - I : 0) : 0,
-            PreviouslyPaidInterest: transactions.reduce((acc, curr) => acc + parseFloat(curr.PaidAmount), 0)
+            PreviouslyPaidInterest: Math.round(transactions.reduce((acc, curr) => acc + curr.PaidAmount, 0))
         };
     }
     interestCalculator(amount, loantakendate, paiddate, paidamount) {
@@ -171,11 +185,10 @@ class LoanMapper {
             noOfDays = noOfDays + 1;
         }
         console.log('Days ', noOfDays);
-        paidamount = parseFloat(paidamount);
         const noOfTimesCompounded = noOfDaysInYear / thresholdPeriod;
         const time_days = noOfDays / noOfDaysInYear;
         const compoundedAmount = amount * Math.pow(1 + (interestRate / noOfTimesCompounded), noOfTimesCompounded * time_days);
-        const sumInterest = Math.ceil(compoundedAmount - amount);
+        const sumInterest = Math.round(compoundedAmount - amount);
         if (paidamount > sumInterest) {
             return { interest: sumInterest, liableAmount: paidamount - sumInterest, dueAmount: 0 };
         }
@@ -185,6 +198,81 @@ class LoanMapper {
         else {
             return { interest: sumInterest, dueAmount: sumInterest - paidamount, liableAmount: 0 };
         }
+    }
+    mapLoanDataToHTML(data, firstname) {
+        const html = `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Loan Details</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                        }
+                        .loan-details {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            border: 1px solid #ddd;
+                            padding: 20px;
+                            border-radius: 5px;
+                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        }
+                        .loan-details h1 {
+                            text-align: center;
+                            color: #333;
+                        }
+                        .loan-details dl {
+                            display: flex;
+                            flex-wrap: wrap;
+                        }
+                        .loan-details dt, .loan-details dd {
+                            width: 50%;
+                            margin: 0;
+                            padding: 5px 0;
+                        }
+                        .loan-details dt {
+                            font-weight: bold;
+                            color: #555;
+                        }
+                        .loan-details dd {
+                            color: #777;
+                        }
+                    </style>
+                </head>
+                <body>
+
+                <div class="loan-details">
+                    <h1>Loan Details of ${firstname}</h1>
+                    <dl>
+                        <dt>Principle:</dt>
+                        <dd id="principle">Rs ${data.Principle}</dd>
+                        
+                        <dt>Due Interest Amount:</dt>
+                        <dd id="dueInterestAmount">Rs ${data.DueInterestAmount}</dd>
+                        
+                        <dt>Interest Amount:</dt>
+                        <dd id="interestAmount">Rs ${data.InterestAmount}</dd>
+                        
+                        <dt>Liable Amount:</dt>
+                        <dd id="liableAmount">Rs ${data.LiableAmount}</dd>
+                        
+                        <dt>Latest Paid Date:</dt>
+                        <dd id="latestPaidDate">${data.LatestPaidDate ? (0, moment_1.default)(data.LatestPaidDate).format('LL') : 'Not paid yet'}</dd>
+                        
+                        <dt>Loan Taken Date:</dt>
+                        <dd id="loanTakenDate">${data.LoanTakenDate ? (0, moment_1.default)(data.LoanTakenDate).format('LL') : 'No date found'}</dd>
+                        
+                        <dt>Previously Paid Interest:</dt>
+                        <dd id="previouslyPaidInterest"> Rs ${data.PreviouslyPaidInterest}</dd>
+                    </dl>
+                </div>
+
+                </body>
+                <footer>Generated by PGROUP</footer>
+                </html>`;
+        return html;
     }
 }
 exports.LoanMapper = LoanMapper;

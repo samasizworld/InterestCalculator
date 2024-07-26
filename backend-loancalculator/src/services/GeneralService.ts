@@ -5,21 +5,17 @@ export class GeneralService<T extends Model> {
     constructor(context: any) {
         this.dbContext = context;
     }
-    async getLists(search: string, pageSize: number, offset: number, orderDir: string, orderBy: string, obj?: { key: string, value: any }): Promise<{ data: T[]; count: number }> {
+    async getLists(searchQuery: any, pageSize: number, offset: number, orderDir: string, orderBy: string, obj?: { key: string, value: any }): Promise<{ data: T[]; count: number }> {
         let whereQuery: any = { datedeleted: null };
         if (obj && obj.key && obj.value) {
             whereQuery[obj.key] = obj.value;
         }
-        let result: { data: T[]; count: number } = { data: [], count: 0 };
-        if (search) {
-            whereQuery = {
-                ...whereQuery,
-                [Op.or]: [
-                    { firstname: { [Op.iLike]: `%${search}%` } },
-                    { emailaddress: { [Op.iLike]: `%${search}%` } },
-                ]
-            }
+        if (searchQuery) {
+            whereQuery = { ...whereQuery, ...searchQuery };
         }
+
+        let result: { data: T[]; count: number } = { data: [], count: 0 };
+
         const orderByAttributeType = this.dbContext.getAttributes()[orderBy]?.type;
         if (pageSize == 0) {
             if (orderByAttributeType == 'TEXT') {

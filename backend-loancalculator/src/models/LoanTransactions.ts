@@ -17,7 +17,16 @@ export class LoanTransactions {
                     type: DataTypes.UUIDV4
                 },
                 paidamount: {
-                    type: DataTypes.NUMBER
+                    type: "NUMERIC",
+                    get() {
+                        const rawValue = this.getDataValue('paidamount');
+                        return rawValue ? parseFloat(rawValue as any) : null;
+                    },
+
+                    set(value: any) {
+                        value = parseFloat(value);
+                        this.setDataValue('paidamount', value);
+                    },
                 },
                 paidtype: {
                     type: DataTypes.ENUM,

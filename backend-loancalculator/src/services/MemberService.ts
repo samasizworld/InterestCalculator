@@ -12,7 +12,17 @@ export class MemberService extends GeneralService<MemberModel> {
     }
 
     async getMembers(search: string, pageSize: number, offset: number, orderBy: string, orderDir: string) {
-        return await this.getLists(search, pageSize, offset, orderDir, orderBy);
+        let searchQuery: any;
+        if (search) {
+            searchQuery = {
+                [Op.or]: [
+                    { firstname: { [Op.iLike]: `%${search}%` } },
+                    { emailaddress: { [Op.iLike]: `%${search}%` } },
+                    { lastname: { [Op.iLike]: `%${search}%` } }
+                ]
+            }
+        }
+        return await this.getLists(searchQuery, pageSize, offset, orderDir, orderBy);
     }
     async createMember(model: MemberModel) {
         return await this.insert(model)
@@ -33,5 +43,9 @@ export class MemberService extends GeneralService<MemberModel> {
         } else {
             return await this.memberModel.findOne({ where: { datedeleted: null, emailaddress, guid: { [Op.ne]: id } } });
         }
+    }
+
+    async getMemberByIntegerId(memberid: number) {
+        return await this.memberModel.findOne({ where: { datedeleted: null, memberid } });
     }
 }

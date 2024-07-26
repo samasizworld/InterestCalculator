@@ -10,20 +10,14 @@ import { MemberController } from './src/controllers/MemberController';
 import { Logger } from './src/utils/logger';
 import { LoanController } from './src/controllers/LoanController';
 import { LoanTransactionController } from './src/controllers/LoanTransactionController';
+import cron from 'node-cron';
 config({ path: "./.env" });
-
+const router = express.Router();
+const app = express();
+const server = http.createServer(app);
 // init vault
 initVault().then(() => {
-    // connect to the database
     sequelizeConnect();
-
-    const router = express.Router();
-    const app = express();
-    const server = http.createServer(app);
-
-    // port initialize
-    server.listen(process.env.APP_PORT, () => { console.log(`Server listening in PORT ${process.env.APP_PORT}`) });
-
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cors({
@@ -32,6 +26,8 @@ initVault().then(() => {
         "exposedHeaders": "*",
         "methods": "GET,HEAD,PUT,PATCH,POST,DELETE"
     }));
+
+
     app.use('/', router);
     app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
         const logger = new Logger();
@@ -82,6 +78,10 @@ initVault().then(() => {
         return new LoanController().calculateInterest(req, res);
     }));
 
+    router.patch('/api/v1/members/:memberid/loans/:loanid/download', asyncHandler((req: Request, res: Response) => {
+        return new LoanController().downloadLoanPDF(req, res);
+    }));
+
     router.post('/api/v1/members/:memberid/loans', asyncHandler((req: Request, res: Response) => {
         return new LoanController().addLoan(req, res);
     }));
@@ -93,7 +93,7 @@ initVault().then(() => {
     router.delete('/api/v1/members/:memberid/loans/:loanid', asyncHandler((req: Request, res: Response) => {
         return new LoanController().deleteLoan(req, res);
     }));
-    
+
     // loan transactions 
 
     router.post('/api/v1/loantransactions', asyncHandler((req: Request, res: Response) => {
@@ -108,7 +108,21 @@ initVault().then(() => {
         return new LoanTransactionController().deleteLoanTransaction(req, res);
     }));
 
+
+    // port initialize
+    server.listen(process.env.APP_PORT, () => { console.log(`Server listening in PORT ${process.env.APP_PORT}`) });
+
 }).catch(error => {
     console.log('Error while connecting to the vault');
     console.error(error)
-})
+});
+
+// in future, it will be added on child_process/ worker process
+// 0 7 * * 0 weekly at 7 in saturday. 
+cron.schedule('0 7 * * 6', () => {
+    console.log('Cron job schedule started.');
+    new LoanController().checkAndSendMailToThoseWhoHaventPaidMoreThan90days();
+});
+
+
+

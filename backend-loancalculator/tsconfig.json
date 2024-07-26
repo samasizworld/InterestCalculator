@@ -9,7 +9,9 @@
         //It allows you to use import syntax to import CommonJS modules that use require.
         "target": "ES6",
         "noImplicitAny": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        // "skipLibCheck": true, // skip d.ts file check
+        // "incremental": true // reusing information from prev compilations
     },
     "exclude": [
         "node_modules"

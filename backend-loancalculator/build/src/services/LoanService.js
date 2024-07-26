@@ -21,7 +21,11 @@ class LoanService extends GeneralService_1.GeneralService {
     getLoans(search, pageSize, offset, orderBy, orderDir, key, value) {
         return __awaiter(this, void 0, void 0, function* () {
             const obj = { key, value };
-            return yield this.getLists(search, pageSize, offset, orderDir, orderBy, obj);
+            let searchQuery;
+            if (search) {
+                searchQuery = '';
+            }
+            return yield this.getLists(searchQuery, pageSize, offset, orderDir, orderBy, obj);
         });
     }
     createLoan(model) {

@@ -17,7 +17,15 @@ class LoanTransactions {
                 type: sequelize_1.DataTypes.UUIDV4
             },
             paidamount: {
-                type: sequelize_1.DataTypes.NUMBER
+                type: "NUMERIC",
+                get() {
+                    const rawValue = this.getDataValue('paidamount');
+                    return rawValue ? parseFloat(rawValue) : null;
+                },
+                set(value) {
+                    value = parseFloat(value);
+                    this.setDataValue('paidamount', value);
+                },
             },
             paidtype: {
                 type: sequelize_1.DataTypes.ENUM,

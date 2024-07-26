@@ -21,7 +21,17 @@ class MemberService extends GeneralService_1.GeneralService {
     }
     getMembers(search, pageSize, offset, orderBy, orderDir) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.getLists(search, pageSize, offset, orderDir, orderBy);
+            let searchQuery;
+            if (search) {
+                searchQuery = {
+                    [sequelize_1.Op.or]: [
+                        { firstname: { [sequelize_1.Op.iLike]: `%${search}%` } },
+                        { emailaddress: { [sequelize_1.Op.iLike]: `%${search}%` } },
+                        { lastname: { [sequelize_1.Op.iLike]: `%${search}%` } }
+                    ]
+                };
+            }
+            return yield this.getLists(searchQuery, pageSize, offset, orderDir, orderBy);
         });
     }
     createMember(model) {
@@ -52,6 +62,11 @@ class MemberService extends GeneralService_1.GeneralService {
             else {
                 return yield this.memberModel.findOne({ where: { datedeleted: null, emailaddress, guid: { [sequelize_1.Op.ne]: id } } });
             }
+        });
+    }
+    getMemberByIntegerId(memberid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.memberModel.findOne({ where: { datedeleted: null, memberid } });
         });
     }
 }

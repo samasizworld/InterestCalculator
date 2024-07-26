@@ -52,7 +52,7 @@ const MemberDetail = () => {
                     toast.error('Internal server error');
                 });
         } else {
-            axios.put(`${apiUrl}members/${memberid}`,JSON.stringify(fields), {
+            axios.put(`${apiUrl}members/${memberid}`, JSON.stringify(fields), {
                 headers: { "Content-Type": "application/json" }
             })
                 .then((res) => {
@@ -71,9 +71,9 @@ const MemberDetail = () => {
 
     return (
         <div className="form-container">
-            <div className="button-group-top">
+            {memberid != '0' ? <div className="button-group-top">
                 <Link to={`/members/${memberid}/loans`} className="view-button">View Loans</Link>
-            </div>
+            </div> : <></>}
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label htmlFor="firstname">First Name</label>

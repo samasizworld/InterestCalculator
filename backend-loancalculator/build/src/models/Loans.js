@@ -17,7 +17,15 @@ class Loans {
                 type: sequelize_1.DataTypes.UUIDV4
             },
             amount: {
-                type: sequelize_1.DataTypes.NUMBER
+                type: "NUMERIC",
+                get() {
+                    const rawValue = this.getDataValue('amount');
+                    return rawValue ? parseFloat(rawValue) : null;
+                },
+                set(value) {
+                    value = parseFloat(value);
+                    this.setDataValue('amount', value);
+                },
             },
             isamountpaid: {
                 type: sequelize_1.DataTypes.BOOLEAN

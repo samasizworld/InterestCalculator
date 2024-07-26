@@ -167,7 +167,6 @@ const LoanDetail = () => {
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        console.log(loan)
         if (loanid == '0') {
             axios.post(`${apiUrl}members/${memberid}/loans`, JSON.stringify(loan), {
                 headers: { "Content-Type": "application/json" }
@@ -196,11 +195,42 @@ const LoanDetail = () => {
         }
     }
 
+    const downloadFile = () => {
+        const handleDownload = async () => {
+            try {
+                const response = await axios.patch(`${apiUrl}members/${memberid}/loans/${loanid}/download`, undefined, {
+                    responseType: 'blob',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                console.log(response)
+                const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                const link: any = document.createElement('a');
+                link.href = url;
+
+                link.setAttribute('download', response.headers['content-disposition'].split('filename=')[1].replace(/"/g, '')); // Specify the filename
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download failed:', error);
+            }
+        };
+        handleDownload();
+    }
+
+
     return (
         <div className="form-container">
             <h3>{displayname}{"'s Loan detail"}</h3>
             <button className="button-group-top" onClick={openModal} disabled={loanid == '0' ? true : false}>
                 Calculate Interest
+            </button>
+
+            <button onClick={downloadFile} className="button-group-top" disabled={loanid == '0' ? true : false}>
+                Download
             </button>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
