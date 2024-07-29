@@ -69,7 +69,7 @@ const LoanList = () => {
                     <tbody>
                         {loans.map(loan => (
                             <tr key={loan.LoanId}>
-                                <td>{'Rs '}{loan.Amount}</td>
+                                <td>{'Rs '}{loan.Amount.toLocaleString('en-US')}</td>
                                 <td>{loan.Loantakendate ? new Date(loan.Loantakendate).toDateString() : ''}</td>
                                 <td>{loan.Datemodified ? new Date(loan.Datemodified).toLocaleString() : ''}</td>
                                 <td>

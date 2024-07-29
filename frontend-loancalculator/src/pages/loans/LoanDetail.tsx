@@ -16,6 +16,9 @@ const LoanDetail = () => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [interest, setInterest] = useState<any>({});
     const [displayname, setDisplayname] = useState<any>('');
+    const [error, setError] = useState<any>({ Amount: "Amount cannot be empty.", LoanTakenDate: "Date cannot be empty." });
+
+    const [errors, setErrors] = useState<any[]>([]);
 
     useEffect(() => {
         if (loanid != '0') {
@@ -26,7 +29,14 @@ const LoanDetail = () => {
                     const transactions = res.data.Transactions;
                     const { Amount, Loantakendate } = res.data;
                     setTransactions(transactions);
+
+
+                    transactions.forEach((t: any) => {
+                        setErrors(prevError => [...prevError, { PaidAmount: t.PaidAmount ? "" : "Amount cannot be empty.", PaidDate: t.PaidDate ? "" : "Date cannot be empty." }]);
+                    })
+                    // setErrors(Array.from({ length: transactions.length }, () => { return { PaidAmount: "", PaidDate: "" } }))
                     setLoan({ Amount: Amount || "", LoanTakenDate: Loantakendate || "" });
+                    setError({ Amount: "", LoanTakenDate: "" })
                 })
                 .catch(err => {
                     console.error(err);
@@ -47,10 +57,78 @@ const LoanDetail = () => {
 
     }, []);
 
+    console.log(errors);
     const handleInputChange1 = (e: any) => {
         const { name, value } = e.target;
+        if (isNaN(value)) {
+            setError((prev: any) => {
+                const updated = { ...prev };
+                updated.Amount = 'Alpha numeric not allowed here.';
+                return updated;
+            });
+        }
+        else if (parseInt(value) > 0) {
+            setError((prev: any) => {
+                const updated = { ...prev };
+                updated.Amount = '';
+                return updated;
+            });
+        } else if (parseInt(value) < 0) {
+            setError((prev: any) => {
+                const updated = { ...prev };
+                updated.Amount = 'Amount cannot be negative.';
+                return updated;
+            });
+
+        }
+        else {
+            setError((prev: any) => {
+                const updated = { ...prev };
+                updated.Amount = 'Amount cannot be empty.';
+                return updated;
+            });
+        }
         setLoan((l: any) => ({ ...l, [name]: value }));
     };
+
+    const handleInputChange = (e: any, index: number) => {
+        const { name, value } = e.target;
+
+        if (isNaN(value)) {
+            setErrors((prev: any) => {
+                const updated = [...prev];
+                updated[index] = { ...updated[index], PaidAmount: 'Alpha numeric not allowed here.' };
+                return updated;
+            });
+        }
+        else if (parseInt(value) > 0) {
+            setErrors((prev: any) => {
+                const updated = [...prev];
+                updated[index] = { ...updated[index], PaidAmount: '' };
+                return updated;
+            });
+        } else if (parseInt(value) < 0) {
+            setErrors((prev: any) => {
+                const updated = [...prev];
+                updated[index] = { ...updated[index], PaidAmount: 'Amount cannot be negative.' };
+                return updated;
+            });
+
+        }
+        else {
+            setErrors((prev: any) => {
+                const updated = [...prev];
+                updated[index] = { ...updated[index], PaidAmount: 'Amount cannot be empty.' };
+                return updated;
+            });
+        }
+
+        setTransactions(prevTransactions => {
+            const updatedTransactions = [...prevTransactions];
+            updatedTransactions[index] = { ...updatedTransactions[index], [name]: value };
+            return updatedTransactions;
+        });
+    }
 
     const handleDateChange1 = (date: any) => {
         if (date) {
@@ -66,10 +144,38 @@ const LoanDetail = () => {
             // value = new Date(`${year}-${month}-${day} 05:45:00`);
             date = new Date(`${year}-${month}-${day} 12:00:00`);
         }
+
+        if (date) {
+            setError((prev: any) => {
+                const updated = { ...prev };
+                updated.LoanTakenDate = '';
+                return updated;
+            });
+        } else {
+            setError((prev: any) => {
+                const updated = { ...prev };
+                updated.LoanTakenDate = 'Date cannot be empty.';
+                return updated;
+            });
+        }
+
         setLoan((l: any) => ({ ...l, LoanTakenDate: date }));
     };
 
     const handleDateChange = (date: any, index: number) => {
+        if (date) {
+            setErrors((prev: any) => {
+                const updated = [...prev];
+                updated[index] = { ...updated[index], PaidDate: "" };
+                return updated;
+            });
+        } else {
+            setErrors((prev: any) => {
+                const updated = [...prev];
+                updated[index] = { ...updated[index], PaidDate: "Date cannot be empty." };
+                return updated;
+            });
+        }
         setTransactions((prevTransactions: any[]) => {
             if (date) {
                 const year = new Date(date).getFullYear();
@@ -91,10 +197,13 @@ const LoanDetail = () => {
     };
 
     const addRows = () => {
-        setTransactions((prevTransactions: any[]) => [
-            ...prevTransactions,
-            { PaidAmount: "", PaidDate: "" }
-        ]);
+        setTransactions((prevTransactions: any[]) => {
+            setErrors(prevErrors => [...prevErrors, { PaidAmount: "Amount cannot be empty.", PaidDate: "Date cannot be empty." }])
+            return [
+                ...prevTransactions,
+                { PaidAmount: "", PaidDate: "" }
+            ]
+        });
     };
 
     const handleSave = (index: number, transactionId: string) => {
@@ -286,6 +395,8 @@ const LoanDetail = () => {
                         onChange={handleInputChange1}
                         className="form-input"
                     />
+                    {error.Amount && <div style={{ color: 'red' }}>{error.Amount}</div>}
+
                 </div>
                 <div className="form-group">
                     <label htmlFor="Loantakendate">Loan Taken Date</label>
@@ -293,6 +404,8 @@ const LoanDetail = () => {
                         value={loan.LoanTakenDate || null}
                         handleDateChange={(date: any) => handleDateChange1(date)}
                     />
+                    {error.LoanTakenDate && <div style={{ color: 'red' }}>{error.LoanTakenDate}</div>}
+
                 </div>
                 <div className="transaction-title">Transactions</div>
                 <button
@@ -311,24 +424,23 @@ const LoanDetail = () => {
                                     value={t.PaidDate || null}
                                     handleDateChange={(date: any) => handleDateChange(date, index)}
                                 />
+                                {errors[index].PaidDate && <div style={{ color: 'red' }}>{errors[index].PaidDate}</div>}
+
+
                                 <input
                                     type="text"
                                     name="PaidAmount"
                                     value={t.PaidAmount || ""}
-                                    onChange={(e) => {
-                                        const { name, value } = e.target;
-                                        setTransactions(prevTransactions => {
-                                            const updatedTransactions = [...prevTransactions];
-                                            updatedTransactions[index] = { ...updatedTransactions[index], [name]: value };
-                                            return updatedTransactions;
-                                        });
-                                    }}
+                                    onChange={(e: any) => handleInputChange(e, index)}
                                     className="form-input"
                                 />
+                                {errors[index].PaidAmount && <div style={{ color: 'red' }}>{errors[index].PaidAmount}</div>}
+
                                 <div className="transaction-buttons">
                                     <button
                                         type="button"
                                         className="save-button"
+                                        disabled={!!errors[index].PaidAmount || !!errors[index].PaidDate}
                                         onClick={() => handleSave(index, t.LoanTransactionId)}
                                     >
                                         Save
@@ -346,7 +458,7 @@ const LoanDetail = () => {
                     ))}
                 </ul>
                 <div className="button-group-bottom">
-                    <button type="submit" className="save-button">Save</button>
+                    <button type="submit" className="save-button" disabled={!!error.LoanTakenDate || !!error.Amount}>Save</button>
                 </div>
             </form>
             <Modal isVisible={showModal} onClose={() => setShowModal(false)}>
