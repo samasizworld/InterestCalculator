@@ -44,11 +44,11 @@ export class MemberController {
             logger.infoLog('Lastname cannot be empty.', 'addMember');
             return res.status(400).send({ message: "Bad Request" });
         }
-        const mem = await memberService.checkMember(model.emailaddress, '', req.method);
-        if (mem) {
-            logger.infoLog('Member already exists.', 'addMember');
-            return res.status(409).send({ message: "Record exists" });
-        }
+        // const mem = await memberService.checkMember(model.emailaddress, '', req.method);
+        // if (mem) {
+        //     logger.infoLog('Member already exists.', 'addMember');
+        //     return res.status(409).send({ message: "Record exists" });
+        // }
         const member = await memberService.createMember(model);
         return res.status(201).send({ id: member.guid });
     }
@@ -68,11 +68,11 @@ export class MemberController {
             logger.infoLog('Lastname cannot be empty.', 'updateMember');
             return res.status(400).send({ message: "Bad Request" });
         }
-        const mem = await memberService.checkMember(model.emailaddress, memberId, req.method);
-        if (mem) {
-            logger.infoLog('Member already exists.', 'updateMember');
-            return res.status(409).send({ message: "Record exists" });
-        }
+        // const mem = await memberService.checkMember(model.emailaddress, memberId, req.method);
+        // if (mem) {
+        //     logger.infoLog('Member already exists.', 'updateMember');
+        //     return res.status(409).send({ message: "Record exists" });
+        // }
         await memberService.updateMember(memberId, model);
         return res.status(204).send();
     }

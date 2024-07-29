@@ -36,5 +36,5 @@ WHEN (pg_trigger_depth()<1)
 EXECUTE FUNCTION member_trigger();
 
 -- creating unique index
-CREATE UNIQUE INDEX IF NOT EXISTS uqidx_members
-ON members (emailaddress ASC NULLS LAST, COALESCE(datedeleted, '2019-04-24 06:31:19.771'::timestamp without time zone) ASC NULLS LAST)
+-- CREATE UNIQUE INDEX IF NOT EXISTS uqidx_members
+-- ON members (emailaddress ASC NULLS LAST, COALESCE(datedeleted, '2019-04-24 06:31:19.771'::timestamp without time zone) ASC NULLS LAST)
