@@ -208,78 +208,85 @@ export class LoanMapper {
 
     mapLoanDataToHTML(data: any, firstname: string) {
         const html = `<!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Loan Details</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 20px;
-                        }
-                        .loan-details {
-                            max-width: 600px;
-                            margin: 0 auto;
-                            border: 1px solid #ddd;
-                            padding: 20px;
-                            border-radius: 5px;
-        
-                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                        }
-                        .loan-details h1 {
-                            text-align: center;
-                            color: #333;
-                        }
-                        .loan-details dl {
-                            display: flex;
-                            flex-wrap: wrap;
-                        }
-                        .loan-details dt, .loan-details dd {
-                            width: 50%;
-                            margin: 0;
-                            padding: 5px 0;
-                        }
-                        .loan-details dt {
-                            font-weight: bold;
-                            color: #555;
-                        }
-                        .loan-details dd {
-                            color: #777;
-                        }
-                    </style>
-                </head>
-                <body>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Loan Details</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                margin: 20px;
+                            }
+                            .loan-details {
+                                max-width: 600px;
+                                margin: 0 auto;
+                                border: 1px solid #ddd;
+                                padding: 20px;
+                                border-radius: 5px;
+                                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                            }
+                            .loan-details h1 {
+                                text-align: center;
+                                color: #333;
+                            }
+                            .loan-details dl {
+                                display: flex;
+                                flex-wrap: wrap;
+                            }
+                            .loan-details dt, .loan-details dd {
+                                width: 50%;
+                                margin: 0;
+                                padding: 5px 0;
+                            }
+                            .loan-details dt {
+                                font-weight: bold;
+                                color: #555;
+                            }
+                            .loan-details dd {
+                                color: #777;
+                            }
+                            .logo {
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                        </style>
+                    </head>
+                    <body>
 
-                <div class="loan-details">
-                    <h1 style="color:blue;">Loan Details of ${firstname}</h1>
-                    <dl>
-                        <dt>Principle:</dt>
-                        <dd id="principle">Rs ${data.Principle}</dd>
-                        
-                        <dt>Due Interest Amount:</dt>
-                        <dd id="dueInterestAmount">Rs ${data.DueInterestAmount}</dd>
-                        
-                        <dt>Interest Amount:</dt>
-                        <dd id="interestAmount">Rs ${data.InterestAmount}</dd>
-                        
-                        <dt>Liable Amount:</dt>
-                        <dd id="liableAmount">Rs ${data.LiableAmount}</dd>
-                        
-                        <dt>Latest Paid Date:</dt>
-                        <dd id="latestPaidDate">${data.LatestPaidDate ? moment(data.LatestPaidDate).format('LL') : 'Not paid yet'}</dd>
-                        
-                        <dt>Loan Taken Date:</dt>
-                        <dd id="loanTakenDate">${data.LoanTakenDate ? moment(data.LoanTakenDate).format('LL') : 'No date found'}</dd>
-                        
-                        <dt>Previously Paid Interest:</dt>
-                        <dd id="previouslyPaidInterest"> Rs ${data.PreviouslyPaidInterest}</dd>
-                    </dl>
-                </div>
+                    <div class="loan-details">
+                        <div class="logo">
+                            <img src="${process.env.API_URL}/logo.jpg" alt="Company Logo" style="max-width: 150px;">
+                        </div>
+                        <h1 style="color:blue;">Loan Details of ${firstname}</h1>
+                        <dl>
+                            <dt>Principle:</dt>
+                            <dd id="principle">Rs ${data.Principle}</dd>
+                            
+                            <dt>Due Interest Amount:</dt>
+                            <dd id="dueInterestAmount">Rs ${data.DueInterestAmount}</dd>
+                            
+                            <dt>Interest Amount:</dt>
+                            <dd id="interestAmount">Rs ${data.InterestAmount}</dd>
+                            
+                            <dt>Advanced Amount:</dt>
+                            <dd id="liableAmount">Rs ${data.LiableAmount}</dd>
+                            
+                            <dt>Latest Paid Date:</dt>
+                            <dd id="latestPaidDate">${data.LatestPaidDate ? moment(data.LatestPaidDate).format('LL') : 'Not paid yet'}</dd>
+                            
+                            <dt>Loan Taken Date:</dt>
+                            <dd id="loanTakenDate">${data.LoanTakenDate ? moment(data.LoanTakenDate).format('LL') : 'No date found'}</dd>
+                            
+                            <dt>Previously Paid Interest:</dt>
+                            <dd id="previouslyPaidInterest"> Rs ${data.PreviouslyPaidInterest}</dd>
+                        </dl>
+                    </div>
 
-                </body>
-                <footer style="text-align:right;margin-top:50px">Generated by <span style="color:blue;">PGROUP<span></footer>
-                </html>`;
+                    </body>
+                    <footer style="text-align:right;margin-top:50px">Generated by <span style="color:blue;">PGROUP<span></footer>
+                    </html>
+                    `;
 
         return html;
     }

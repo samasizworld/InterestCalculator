@@ -25,6 +25,9 @@ $$
 DECLARE
 BEGIN
     UPDATE loans SET datemodified = now() WHERE loanid = NEW.loanid;
+    IF(NEW.datedeleted IS NOT NULL)THEN
+        UPDATE loantransactions SET datedeleted = now() WHERE loanid = NEW.loanid;
+    END IF;
     RETURN NEW;
 END;
 $$;

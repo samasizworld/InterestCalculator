@@ -21,6 +21,9 @@ $$
 DECLARE
 BEGIN
     UPDATE members SET datemodified = now() WHERE memberid = NEW.memberid;
+    IF(NEW.datedeleted IS NOT NULL)THEN
+        UPDATE loans SET datedeleted = now() WHERE memberid = NEW.memberid;
+    END IF;
     RETURN NEW;
 END;
 $$;

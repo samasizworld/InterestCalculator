@@ -17,4 +17,6 @@
     policies="default,user_polices"
 12. now login via userpass created at step 4
 
-# Postgres
+# Express Static
+
+Please copy public folder inside build directory

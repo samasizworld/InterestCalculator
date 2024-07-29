@@ -6,10 +6,10 @@ import { MemberService } from "../services/MemberService";
 import { Logger } from "../utils/logger";
 import { LoanTransactionService } from "../services/LoanTransactionService";
 import { LoanTransactionMapper } from "../mapper/LoanTransactionMapper";
-import { sendMailTo } from "../utils/mailSender";
 import { pdfGenerateByHtml } from "../utils/pdfGenerator";
-import fs from 'fs';
 import moment from "moment";
+import { messageTemplates } from "../utils/enums";
+import { MessageService } from "../services/MessageService";
 
 export class LoanController {
     async getLoans(req: Request, res: Response) {
@@ -116,71 +116,28 @@ export class LoanController {
         const dbContext = createDbContext();
         const loanService = new LoanService(dbContext);
         const memberService = new MemberService(dbContext);
+        const messageService = new MessageService(dbContext);
         const { data } = await loanService.getLoans('', 0, 0, 'loanid', 'ASC');
         const logger = new Logger();
         for (const loan of data) {
             const loanTransactionService = new LoanTransactionService(dbContext);
             if (!loan) {
                 logger.infoLog('Loan not found', 'checkAndSendMailToThoseWhoHaventPaidMoreThan90days');
+                continue;
             }
             const member = await memberService.getMemberByIntegerId(loan.memberid);
+            if (!member) {
+                logger.infoLog('Member not found', 'checkAndSendMailToThoseWhoHaventPaidMoreThan90days');
+                continue;
+            }
             const txns = await loanTransactionService.getTransactions(loan.loanid);
             const transactions = new LoanTransactionMapper().listMapper(txns);
             const check = new LoanMapper().checkDays(loan, transactions);
             if (check == true) {
-                await sendMailTo(member.emailaddress, `<!DOCTYPE html>
-                <html lang="en">
-                <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Payment Reminder</title>
-                <style>
-                    body {
-                    font-family: Arial, sans-serif;
-                    line-height: 1.6;
-                    background-color: #f8f8f8;
-                    margin: 0;
-                    padding: 20px;
-                    }
-                    .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                    background-color: #fff;
-                    border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                    }
-                    .header {
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #333;
-                    margin-bottom: 20px;
-                    }
-                    .content {
-                    font-size: 16px;
-                    color: #555;
-                    }
-                    .footer {
-                    margin-top: 30px;
-                    font-size: 14px;
-                    color: #777;
-                    }
-                </style>
-                </head>
-                <body>
-                <div class="container">
-                    <div class="header">Payment Reminder</div>
-                    <div class="content">
-                    <p>Hi <strong>${member.firstname}</strong>,</p>
-                    <p>You haven't paid interest since 90 days. Please contact P Group loan committee member for more info.</p>
-                    <p>Thank you.</p>
-                    </div>
-                    <div class="footer">
-                    <p>P Group Loan Committee</p>
-                    </div>
-                </div>
-                </body>
-                </html>`, 'Payment reminder');
+                const model = {
+                    recipientemailaddress: member.emailaddress, body: messageTemplates["loanpaymentreminder"].body.replace('{firstname}', member.firstname), subject: messageTemplates["loanpaymentreminder"].subject
+                };
+                await messageService.addMessage(model);
             }
         }
     }
@@ -212,6 +169,45 @@ export class LoanController {
         });
 
         return res.status(200).end(pdfBuffer);
+
+    }
+
+
+    async sendMemberAEmailWithLoanInterestPaymentDetail(req: Request, res: Response) {
+        const dbContext = createDbContext();
+        const loanId = req.params.loanid;
+        const loanService = new LoanService(dbContext);
+        const loanTransactionService = new LoanTransactionService(dbContext);
+        const memberService = new MemberService(dbContext);
+        const messageService = new MessageService(dbContext);
+        const logger = new Logger();
+        const loan = await loanService.getDetailById(loanId);
+        if (!loan) {
+            logger.infoLog('Loan not found', 'sendMemberAEmailWithLoanInterestPaymentDetail');
+            return res.status(404).send({ message: "Resource not found." });
+        }
+        const member = await memberService.getMemberByIntegerId(loan.memberid);
+        const txns = await loanTransactionService.getTransactions(loan.loanid);
+        const transactions = new LoanTransactionMapper().listMapper(txns)
+        const dto = new LoanMapper().interestMapper(loan, transactions);
+        const html = new LoanMapper().mapLoanDataToHTML(dto, member.firstname);
+
+        const pdfBuffer = await pdfGenerateByHtml(html);
+        let datetime = moment().format('YYYYMMDD_HHmmss');
+        let filename = `${member.firstname}` + '_loan_' + datetime + ".pdf";
+        const attachments = [{
+            filename: filename,
+            content: pdfBuffer.toString('base64'),
+            encoding:'base64'
+        }];
+
+        const model = {
+            recipientemailaddress: member.emailaddress, body: messageTemplates["loanpaymentdetail"].body.replace('{firstname}', member.firstname), subject: messageTemplates["loanpaymentdetail"].subject, attachments
+        };
+
+        await messageService.addMessage(model);
+
+        return res.status(200).send({ message: `Email ${member.emailaddress} added to MQ.` });
 
     }
 }

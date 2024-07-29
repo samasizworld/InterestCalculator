@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
-export const sendMailTo = async (recieverEmailAddress: string, body: string = 'This is only test mail', subject: string = 'Test Mail') => {
+export const sendMailTo = async (recieverEmailAddress: string, body: string = 'This is only test mail', subject: string = 'Test Mail', attachments: any[] = []) => {
 
     const oAuth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
@@ -29,6 +29,7 @@ export const sendMailTo = async (recieverEmailAddress: string, body: string = 'T
         to: recieverEmailAddress,
         subject,
         html: body,
+        attachments
     };
 
     await transport.sendMail(mailOptions);

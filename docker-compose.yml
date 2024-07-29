@@ -52,6 +52,14 @@ services:
     entrypoint: vault server -config /vault/config/config.hcl
     networks:
       - lc
+  redisserver:
+    image: redis
+    container_name: redisserver
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - lc
 networks:
   lc:
     driver: bridge

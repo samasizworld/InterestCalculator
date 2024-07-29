@@ -247,6 +247,20 @@ const LoanDetail = () => {
         handleDownload();
     }
 
+    const sendMail = () => {
+        axios.patch(`${apiUrl}members/${memberid}/loans/${loanid}/sendmail`, undefined, {
+            headers: { "Content-Type": "application/json" }
+        })
+            .then((res) => {
+                console.log(res.data);
+                toast.success('Mail sent.');
+            })
+            .catch(err => {
+                console.log(err)
+                toast.error('Internal server error')
+            });
+    }
+
 
     return (
         <div className="form-container">
@@ -257,6 +271,9 @@ const LoanDetail = () => {
 
             <button onClick={downloadFile} className="button-group-top" disabled={loanid == '0' ? true : false}>
                 Download
+            </button>
+            <button onClick={sendMail} className="button-group-top" disabled={loanid == '0' ? true : false}>
+                Send Mail
             </button>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
@@ -348,7 +365,7 @@ const LoanDetail = () => {
                         <span className="modal-content-value">{interest.DueInterestAmount}</span>
                     </div>
                     <div className="modal-content-row">
-                        <span className="modal-content-label">Liable Interest:</span>
+                        <span className="modal-content-label">Advanced Recieved:</span>
                         <span className="modal-content-value">{interest.LiableAmount}</span>
                     </div>
                     <div className="modal-content-row">
