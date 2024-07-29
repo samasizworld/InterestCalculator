@@ -42,24 +42,25 @@ const MemberList = () => {
       .then((res) => {
         console.log(res.data);
         toast.success(`Member deleted.`);
+        axios.get(`${apiUrl}members?search=${queryParams.search}&page=${queryParams.page}&pageSize=${queryParams.pageSize}&orderBy=${queryParams.orderBy}&orderDir=${queryParams.orderDir}`, {
+          headers: { "Content-Type": "application/json" }
+        })
+          .then((res) => {
+            const result = res.data;
+            setMembers(result);
+            setTotalCount(res.headers['x-count']);
+          })
+          .catch(err => {
+            console.log(err)
+            toast.error('Internal server error')
+          });
       })
       .catch(err => {
         console.log(err)
         toast.error('Internal server error')
       });
 
-    axios.get(`${apiUrl}members?search=${queryParams.search}&page=${queryParams.page}&pageSize=${queryParams.pageSize}&orderBy=${queryParams.orderBy}&orderDir=${queryParams.orderDir}`, {
-      headers: { "Content-Type": "application/json" }
-    })
-      .then((res) => {
-        const result = res.data;
-        setMembers(result);
-        setTotalCount(res.headers['x-count']);
-      })
-      .catch(err => {
-        console.log(err)
-        toast.error('Internal server error')
-      });
+
   }
 
   const totalPageToShow = Math.ceil(total / queryParams.pageSize);
@@ -97,7 +98,7 @@ const MemberList = () => {
               <tr key={member.MemberId}>
                 <td>{member.Displayname}</td>
                 <td>{member.Emailaddress}</td>
-                <td>{member.Datemodified}</td>
+                <td>{member.Datemodified ? new Date(member.Datemodified).toLocaleString() : ''}</td>
                 <td>
                   <Link to={`/members/${member.MemberId}`}>View</Link>
                 </td>

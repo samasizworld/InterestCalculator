@@ -23,6 +23,33 @@ const LoanList = () => {
     }, []);
 
 
+    const deleteLoan = (loanid: string) => {
+        axios.delete(`${apiUrl}members/${memberid}/loans/${loanid}`, {
+            headers: { "Content-Type": "application/json" }
+        })
+            .then((res) => {
+                console.log(res.data);
+                toast.success('Record deleted.');
+
+                axios.get(`${apiUrl}members/${memberid}/loans?pageSize=0`, {
+                    headers: { "Content-Type": "application/json" }
+                })
+                    .then((res) => {
+                        const result = res.data;
+                        setLoans(result);
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        toast.error('Internal server error')
+                    });
+            })
+            .catch(err => {
+                console.log(err)
+                toast.error('Internal server error')
+            });
+    }
+
+
     return (
         <div className="member-container">
             <Link to={`/members/${memberid}/loans/0`} className="add-button">
@@ -32,7 +59,7 @@ const LoanList = () => {
                 <table className="member-table">
                     <thead>
                         <tr>
-                            <th>Principle Amount</th>
+                            <th>Principle Amount (Rs)</th>
                             <th>Loan Taken Date</th>
                             <th>Datemodified</th>
                             <th></th>
@@ -42,14 +69,14 @@ const LoanList = () => {
                     <tbody>
                         {loans.map(loan => (
                             <tr key={loan.LoanId}>
-                                <td>{loan.Amount}</td>
-                                <td>{loan.Loantakendate}</td>
-                                <td>{loan.Datemodified}</td>
+                                <td>{'Rs '}{loan.Amount}</td>
+                                <td>{loan.Loantakendate ? new Date(loan.Loantakendate).toDateString() : ''}</td>
+                                <td>{loan.Datemodified ? new Date(loan.Datemodified).toLocaleString() : ''}</td>
                                 <td>
                                     <Link to={`/members/${memberid}/loans/${loan.LoanId}`}>View</Link>
                                 </td>
                                 <td>
-                                    <button>Delete</button>
+                                    <button onClick={() => deleteLoan(loan.LoanId)}>Delete</button>
                                 </td>
                             </tr>
                         ))}

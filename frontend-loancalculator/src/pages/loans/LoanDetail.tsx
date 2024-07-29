@@ -221,31 +221,31 @@ const LoanDetail = () => {
         }
     }
 
-    const downloadFile = () => {
-        const handleDownload = async () => {
-            try {
-                const response = await axios.patch(`${apiUrl}members/${memberid}/loans/${loanid}/download`, undefined, {
-                    responseType: 'blob',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                console.log(response)
-                const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-                const link: any = document.createElement('a');
-                link.href = url;
+    // const downloadFile = () => {
+    //     const handleDownload = async () => {
+    //         try {
+    //             const response = await axios.patch(`${apiUrl}members/${memberid}/loans/${loanid}/download`, undefined, {
+    //                 responseType: 'blob',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //             });
+    //             console.log(response)
+    //             const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    //             const link: any = document.createElement('a');
+    //             link.href = url;
 
-                link.setAttribute('download', response.headers['content-disposition'].split('filename=')[1].replace(/"/g, '')); // Specify the filename
-                document.body.appendChild(link);
-                link.click();
-                link.parentNode.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error('Download failed:', error);
-            }
-        };
-        handleDownload();
-    }
+    //             link.setAttribute('download', response.headers['content-disposition'].split('filename=')[1].replace(/"/g, '')); // Specify the filename
+    //             document.body.appendChild(link);
+    //             link.click();
+    //             link.parentNode.removeChild(link);
+    //             window.URL.revokeObjectURL(url);
+    //         } catch (error) {
+    //             console.error('Download failed:', error);
+    //         }
+    //     };
+    //     handleDownload();
+    // }
 
     const sendMail = () => {
         axios.patch(`${apiUrl}members/${memberid}/loans/${loanid}/sendmail`, undefined, {
@@ -269,9 +269,9 @@ const LoanDetail = () => {
                 Calculate Interest
             </button>
 
-            <button onClick={downloadFile} className="button-group-top" disabled={loanid == '0' ? true : false}>
+            {/* <button onClick={downloadFile} className="button-group-top" disabled={loanid == '0' ? true : false}>
                 Download
-            </button>
+            </button> */}
             <button onClick={sendMail} className="button-group-top" disabled={loanid == '0' ? true : false}>
                 Send Mail
             </button>
@@ -354,27 +354,32 @@ const LoanDetail = () => {
                     <h3>Interest Calculation Details</h3>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Amount:</span>
-                        <span className="modal-content-value">{interest.Principle || ''}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.Principle || ''}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Interest:</span>
-                        <span className="modal-content-value">{interest.InterestAmount}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.InterestAmount}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Due Interest Amount:</span>
-                        <span className="modal-content-value">{interest.DueInterestAmount}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.DueInterestAmount}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Advanced Recieved:</span>
-                        <span className="modal-content-value">{interest.LiableAmount}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.LiableAmount}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Latest Paid Date:</span>
-                        <span className="modal-content-value">{interest.LatestPaidDate}</span>
+                        <span className="modal-content-value">{interest.LatestPaidDate ? new Date(interest.LatestPaidDate).toDateString() : ''}</span>
+                    </div>
+
+                    <div className="modal-content-row">
+                        <span className="modal-content-label">Loan taken date:</span>
+                        <span className="modal-content-value">{interest.LoanTakenDate ? new Date(interest.LoanTakenDate).toDateString() : ''}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Previously Paid Interest:</span>
-                        <span className="modal-content-value">{interest.PreviouslyPaidInterest}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.PreviouslyPaidInterest}</span>
                     </div>
                 </div>
             </Modal>
