@@ -34,7 +34,7 @@ export class LoanTransactions {
                     defaultValue: null
                 },
                 paiddate: {
-                    type: DataTypes.DATE
+                    type: "TIMESTAMP",
                 },
                 loanid: {
                     type: DataTypes.INTEGER

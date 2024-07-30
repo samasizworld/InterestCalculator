@@ -33,7 +33,7 @@ class LoanTransactions {
                 defaultValue: null
             },
             paiddate: {
-                type: sequelize_1.DataTypes.DATE
+                type: "TIMESTAMP",
             },
             loanid: {
                 type: sequelize_1.DataTypes.INTEGER

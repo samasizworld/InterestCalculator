@@ -32,7 +32,7 @@ export class Loans {
                     type: DataTypes.BOOLEAN
                 },
                 loantakendate: {
-                    type: DataTypes.DATE
+                    type: "TIMESTAMP"
                 },
                 memberid: {
                     type: DataTypes.INTEGER

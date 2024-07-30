@@ -34,76 +34,6 @@ class LoanMapper {
             memberid: memberid
         };
     }
-    // interestMapper(loan: LoanModel, transactions: any[]) {
-    //     const amount = parseFloat(loan.amount as any);
-    //     let dueAmountTotal = 0;
-    //     let liableAmountTotal = 0;
-    //     for (let i = 0; i < transactions.length; i++) {
-    //         if (i == 0) {
-    //             const { dueAmount, liableAmount } = this.interestCalculator(amount, loan.loantakendate, transactions[i].PaidDate, transactions[i].PaidAmount);
-    //             dueAmountTotal = dueAmountTotal + dueAmount;
-    //             liableAmountTotal = liableAmount + liableAmount;
-    //         } else {
-    //             const { liableAmount, dueAmount } = this.interestCalculator(amount, transactions[i - 1].PaidDate, transactions[i].PaidDate, transactions[i].PaidAmount);
-    //             dueAmountTotal = dueAmountTotal + dueAmount;
-    //             liableAmountTotal = liableAmount + liableAmount;
-    //         }
-    //     }
-    //     const principleAmount = dueAmountTotal + amount;
-    //     const latestPaidDate = transactions[transactions.length - 1]?.PaidDate;
-    //     console.log(latestPaidDate);
-    //     let I: any;
-    //     if (transactions.length > 0) {
-    //         const { interest } = this.interestCalculator(principleAmount, latestPaidDate, new Date(), 0);
-    //         I = interest;
-    //     } else {
-    //         const { interest } = this.interestCalculator(principleAmount, loan.loantakendate, new Date(), 0);
-    //         I = interest;
-    //     }
-    //     return {
-    //         LoanId: loan.guid,
-    //         Principle: amount,
-    //         DueInterestAmount: Math.ceil(dueAmountTotal),
-    //         InterestAmount: Math.ceil(I),
-    //         LiableAmount: Math.ceil(liableAmountTotal),
-    //         PreviouslyPaidInterest: transactions.reduce((acc, curr) => acc + parseFloat(curr.PaidAmount), 0)
-    //     }
-    // }
-    // interestCalculator(amount: any, loantakendate: any, paiddate: any, paidamount: any) {
-    //     let interest = 0;
-    //     let sumInterest = 0;
-    //     const currentDate = moment(paiddate);
-    //     const initialDate = moment(loantakendate);
-    //     const thresholdPeriod = parseInt(process.env.LOAN_THRESHOLD_PERIOD);
-    //     let noOfDays = currentDate.diff(initialDate, 'days');
-    //     if (noOfDays == 0) {
-    //         noOfDays = 0;
-    //     } else {
-    //         noOfDays = noOfDays + 1;
-    //     }
-    //     console.log('Days ', noOfDays);
-    //     paidamount = parseFloat(paidamount);
-    //     // calculate compound interest
-    //     while (noOfDays > 0) {
-    //         if (noOfDays >= thresholdPeriod) {
-    //             interest = ((interest + amount) * thresholdPeriod * 0.1) / 365;
-    //             sumInterest = sumInterest + interest;
-    //             noOfDays = noOfDays - thresholdPeriod;
-    //         } else {
-    //             interest = ((interest + amount) * noOfDays * 0.1) / 365;
-    //             sumInterest = sumInterest + interest;
-    //             noOfDays = 0;
-    //         }
-    //     }
-    //     sumInterest = Math.ceil(sumInterest);
-    //     if (paidamount > sumInterest) {
-    //         return { amount, interest: sumInterest, liableAmount: paidamount - sumInterest, dueAmount: 0 };
-    //     } else if (paidamount == 0) {
-    //         return { amount, interest: sumInterest, dueAmount: sumInterest, liableAmount: 0 };
-    //     } else {
-    //         return { amount, interest: sumInterest, dueAmount: sumInterest - paidamount, liableAmount: 0 };
-    //     }
-    // }
     checkDays(loan, transactions) {
         var _a;
         const lastPaidDate = (_a = transactions[transactions.length - 1]) === null || _a === void 0 ? void 0 : _a.PaidDate;
@@ -121,56 +51,6 @@ class LoanMapper {
         }
         return false;
     }
-    interestMapper(loan, transactions) {
-        var _a;
-        let dueAmountTotal = 0;
-        let liableAmountTotal = 0;
-        for (let i = 0; i < transactions.length; i++) {
-            if (i == 0) {
-                const { dueAmount, liableAmount } = this.interestCalculator(loan.amount, loan.loantakendate, transactions[i].PaidDate, transactions[i].PaidAmount);
-                dueAmountTotal = dueAmountTotal + dueAmount;
-                liableAmountTotal = liableAmountTotal + liableAmount;
-            }
-            else {
-                const { liableAmount, dueAmount } = this.interestCalculator(loan.amount, transactions[i - 1].PaidDate, transactions[i].PaidDate, transactions[i].PaidAmount);
-                dueAmountTotal = dueAmountTotal + dueAmount;
-                liableAmountTotal = liableAmountTotal + liableAmount;
-            }
-        }
-        const principleAmount = dueAmountTotal + loan.amount;
-        const latestPaidDate = (_a = transactions[transactions.length - 1]) === null || _a === void 0 ? void 0 : _a.PaidDate;
-        console.log('Latest Paid date ', latestPaidDate);
-        let I;
-        if (transactions.length > 0) {
-            const { interest } = this.interestCalculator(principleAmount, latestPaidDate, new Date(), 0);
-            I = interest;
-        }
-        else {
-            const { interest } = this.interestCalculator(principleAmount, loan.loantakendate, new Date(), 0);
-            I = interest;
-        }
-        // let date;
-        // let dayss;
-        // if (transactions.length > 0 && liableAmountTotal) {
-        //     dayss = ((Math.log((loan.amount + liableAmountTotal) / loan.amount) / Math.log(1 + (0.1 / 4.06))) * 365) / 4.06;
-        //     dayss = Math.ceil(dayss)
-        //     date = moment(latestPaidDate).add(dayss, 'days').format('YYYY-MM-DD');
-        // }
-        return {
-            LoanId: loan.guid,
-            Principle: Math.round(loan.amount),
-            DueInterestAmount: Math.round(dueAmountTotal),
-            InterestAmount: Math.round(I),
-            LiableAmount: Math.round(liableAmountTotal),
-            // DatetoVoidLiableAmount: date,
-            // NoofDaystoVoid: dayss,
-            LatestPaidDate: latestPaidDate ? (0, moment_1.default)(latestPaidDate).format('YYYY-MM-DD') : null,
-            LoanTakenDate: loan.loantakendate ? (0, moment_1.default)(loan.loantakendate).format('YYYY-MM-DD') : null,
-            // InterestAmount: liableAmountTotal > 0 ? (I < liableAmountTotal ? 0 : liableAmountTotal - I) : I,
-            // LiableAmount: liableAmountTotal > 0 ? (liableAmountTotal > I ? liableAmountTotal - I : 0) : 0,
-            PreviouslyPaidInterest: Math.round(transactions.reduce((acc, curr) => acc + curr.PaidAmount, 0))
-        };
-    }
     interestCalculator(amount, loantakendate, paiddate, paidamount) {
         const currentDate = (0, moment_1.default)(paiddate);
         const initialDate = (0, moment_1.default)(loantakendate);
@@ -181,23 +61,156 @@ class LoanMapper {
         if (noOfDays == 0) {
             noOfDays = 0;
         }
-        else {
-            noOfDays = noOfDays + 1;
+        else if (noOfDays < 0) {
+            noOfDays = 0;
         }
         console.log('Days ', noOfDays);
         const noOfTimesCompounded = noOfDaysInYear / thresholdPeriod;
         const time_days = noOfDays / noOfDaysInYear;
         const compoundedAmount = amount * Math.pow(1 + (interestRate / noOfTimesCompounded), noOfTimesCompounded * time_days);
         const sumInterest = Math.round(compoundedAmount - amount);
+        let tempNoofDays = noOfDays;
+        let interestDetails = [];
+        let compoundedAmountTemp = 0;
+        let time_days_temp = 0;
+        let sumInterestTemp = 0;
+        while (tempNoofDays > 0) {
+            if (tempNoofDays >= thresholdPeriod) {
+                time_days_temp = thresholdPeriod / noOfDaysInYear;
+                compoundedAmountTemp = amount * Math.pow(1 + (interestRate / noOfTimesCompounded), noOfTimesCompounded * time_days_temp);
+                sumInterestTemp = Math.round(compoundedAmountTemp - amount);
+                interestDetails.push({ ExceptedInterestAmount: sumInterestTemp, PaidDays: thresholdPeriod });
+                tempNoofDays = tempNoofDays - thresholdPeriod;
+            }
+            else {
+                time_days_temp = tempNoofDays / noOfDaysInYear;
+                compoundedAmountTemp = amount * Math.pow(1 + (interestRate / noOfTimesCompounded), noOfTimesCompounded * time_days_temp);
+                sumInterestTemp = Math.round(compoundedAmountTemp - amount);
+                interestDetails.push({ ExceptedInterestAmount: sumInterestTemp, PaidDays: tempNoofDays });
+                tempNoofDays = 0;
+            }
+        }
         if (paidamount > sumInterest) {
-            return { interest: sumInterest, liableAmount: paidamount - sumInterest, dueAmount: 0 };
+            return { interest: sumInterest, interestDetails, liableAmount: paidamount - sumInterest, dueAmount: 0 };
         }
         else if (paidamount == 0) {
-            return { interest: sumInterest, dueAmount: sumInterest, liableAmount: 0 };
+            return { interest: sumInterest, interestDetails, dueAmount: sumInterest, liableAmount: 0 };
         }
         else {
-            return { interest: sumInterest, dueAmount: sumInterest - paidamount, liableAmount: 0 };
+            return { interest: sumInterest, interestDetails, dueAmount: sumInterest - paidamount, liableAmount: 0 };
         }
+    }
+    interestMapper(loan, transactions) {
+        var _a;
+        let dueAmountTotal = 0;
+        let liableAmountTotal = 0;
+        let paidInterestDetails = [];
+        for (let i = 0; i < transactions.length; i++) {
+            if (i == 0) {
+                const { dueAmount, liableAmount, interestDetails } = this.interestCalculator(loan.amount, loan.loantakendate, transactions[i].PaidDate, transactions[i].PaidAmount);
+                dueAmountTotal = dueAmountTotal + dueAmount;
+                liableAmountTotal = liableAmountTotal + liableAmount;
+                paidInterestDetails.push({ TransactionId: transactions[i].LoanTransactionId, interestDetails });
+            }
+            else {
+                const { liableAmount, dueAmount, interestDetails } = this.interestCalculator(loan.amount, transactions[i - 1].PaidDate, transactions[i].PaidDate, transactions[i].PaidAmount);
+                dueAmountTotal = dueAmountTotal + dueAmount;
+                liableAmountTotal = liableAmountTotal + liableAmount;
+                paidInterestDetails.push({ TransactionId: transactions[i].LoanTransactionId, interestDetails });
+            }
+        }
+        const principleAmount = dueAmountTotal + loan.amount;
+        const latestPaidDate = (_a = transactions[transactions.length - 1]) === null || _a === void 0 ? void 0 : _a.PaidDate;
+        let I;
+        let D;
+        let now = new Date();
+        if (now) {
+            const year = new Date(now).getFullYear();
+            const month = new Date(now).getMonth() + 1;
+            const day = new Date(now).getDate();
+            // steps
+            // datepicker sends date with 00:00:00 and timezone kathmandu 
+            // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
+            //  inorder to fix it, i make 5:45
+            // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
+            // value = new Date(`${year}-${month}-${day} 05:45:00`);
+            now = new Date(`${year}-${month}-${day} 06:15:00`);
+        }
+        if (transactions.length > 0) {
+            const { interest, interestDetails } = this.interestCalculator(principleAmount, latestPaidDate, now, 0);
+            I = interest;
+            D = interestDetails;
+        }
+        else {
+            const { interest, interestDetails } = this.interestCalculator(principleAmount, loan.loantakendate, now, 0);
+            I = interest;
+            D = interestDetails;
+        }
+        I = Math.round(I);
+        dueAmountTotal = Math.round(dueAmountTotal);
+        liableAmountTotal = Math.round(liableAmountTotal);
+        const totalInterest = I + dueAmountTotal;
+        const totalDueAmountRemaining = dueAmountTotal > 0 ? (dueAmountTotal > totalInterest ? dueAmountTotal - totalInterest : 0) : 0;
+        const totalAdvancedAmount = liableAmountTotal > 0 ? (liableAmountTotal > totalInterest ? liableAmountTotal - totalInterest : 0) : 0;
+        const totalInterestAmount = liableAmountTotal > 0 ? (totalInterest < liableAmountTotal ? 0 : totalInterest - liableAmountTotal) : totalInterest;
+        // let daysThatLiableAmountApplies: any[] = [];
+        // let totalDaysThatLiableAmountApplies_temp = 0;
+        // if (transactions.length > 0 && liableAmountTotal) {
+        //     let addDays = 0;
+        //     let totalDaysThatLiableAmountApplies = 0;
+        //     const thresholdPeriod = parseInt(process.env.LOAN_THRESHOLD_PERIOD);
+        //     const interestRate = parseFloat(process.env.LOAN_INTEREST_RATE);
+        //     const noOfDaysInYear = parseInt(process.env.NO_OF_DAYS_IN_YEAR);
+        //     const noOfTimesCompounded = noOfDaysInYear / thresholdPeriod;
+        //     totalDaysThatLiableAmountApplies = ((Math.log((loan.amount + liableAmountTotal) / loan.amount) / Math.log(1 + (interestRate / noOfTimesCompounded))) * noOfDaysInYear) / noOfTimesCompounded;
+        //     totalDaysThatLiableAmountApplies = Math.round(totalDaysThatLiableAmountApplies);
+        //     totalDaysThatLiableAmountApplies_temp = totalDaysThatLiableAmountApplies;
+        //     while (totalDaysThatLiableAmountApplies > 0) {
+        //         if (totalDaysThatLiableAmountApplies >= thresholdPeriod) {
+        //             const time_days = thresholdPeriod / noOfDaysInYear;
+        //             const compoundedAmount = loan.amount * Math.pow(1 + (interestRate / noOfTimesCompounded), noOfTimesCompounded * time_days)
+        //             const sumInterest = Math.round(compoundedAmount - loan.amount);
+        //             addDays = addDays + thresholdPeriod;
+        //             daysThatLiableAmountApplies.push({
+        //                 InterestAmount: sumInterest, Days: thresholdPeriod, Date: moment(latestPaidDate).add(addDays, 'days').format('YYYY-MM-DD')
+        //             });
+        //             totalDaysThatLiableAmountApplies = totalDaysThatLiableAmountApplies - thresholdPeriod;
+        //         } else {
+        //             const time_days = totalDaysThatLiableAmountApplies / noOfDaysInYear;
+        //             const compoundedAmount = loan.amount * Math.pow(1 + (interestRate / noOfTimesCompounded), noOfTimesCompounded * time_days)
+        //             const sumInterest = Math.round(compoundedAmount - loan.amount);
+        //             addDays = addDays + totalDaysThatLiableAmountApplies;
+        //             daysThatLiableAmountApplies.push({
+        //                 InterestAmount: sumInterest, Days: totalDaysThatLiableAmountApplies, Date: moment(latestPaidDate).add(addDays, 'days').format('YYYY-MM-DD')
+        //             });
+        //             totalDaysThatLiableAmountApplies = 0;
+        //         }
+        //     }
+        // }
+        return {
+            LoanId: loan.guid,
+            Principle: Math.round(loan.amount),
+            DueInterestAmount: dueAmountTotal,
+            InterestDetails: D,
+            LiableAmount: liableAmountTotal,
+            InterestAmount: totalInterestAmount,
+            LiableAmountRemaining: totalAdvancedAmount,
+            DueInterestAmountRemaining: totalDueAmountRemaining,
+            // DetailsofAdvancePaymentsToVoid: daysThatLiableAmountApplies,
+            // NoofDaystoVoidAdvanceAmount: totalDaysThatLiableAmountApplies_temp,
+            LatestPaidDate: latestPaidDate ? (0, moment_1.default)(latestPaidDate).format('YYYY-MM-DD') : null,
+            LoanTakenDate: loan.loantakendate ? (0, moment_1.default)(loan.loantakendate).format('YYYY-MM-DD') : null,
+            PreviouslyPaidInterest: Math.round(transactions.reduce((acc, curr) => acc + curr.PaidAmount, 0)),
+            Transactions: transactions.map((t) => {
+                const matchT = paidInterestDetails.find(pid => pid.TransactionId == t.LoanTransactionId);
+                return {
+                    PaidAmount: t.PaidAmount,
+                    PaidDate: t.PaidDate,
+                    Details: matchT ? matchT.interestDetails : [],
+                    ExceptedTotalInterestAmount: matchT ? matchT.interestDetails.reduce((acc, curr) => acc + curr.ExceptedInterestAmount, 0) : 0
+                };
+            })
+        };
     }
     mapLoanDataToHTML(data, firstname) {
         const html = `<!DOCTYPE html>
@@ -257,13 +270,13 @@ class LoanMapper {
                             <dd id="principle">Rs ${data.Principle}</dd>
                             
                             <dt>Due Interest Amount:</dt>
-                            <dd id="dueInterestAmount">Rs ${data.DueInterestAmount}</dd>
+                            <dd id="dueInterestAmount">Rs ${data.DueInterestAmountRemaining}</dd>
                             
                             <dt>Interest Amount:</dt>
                             <dd id="interestAmount">Rs ${data.InterestAmount}</dd>
                             
                             <dt>Advanced Amount:</dt>
-                            <dd id="liableAmount">Rs ${data.LiableAmount}</dd>
+                            <dd id="liableAmount">Rs ${data.LiableAmountRemaining}</dd>
                             
                             <dt>Latest Paid Date:</dt>
                             <dd id="latestPaidDate">${data.LatestPaidDate ? (0, moment_1.default)(data.LatestPaidDate).format('LL') : 'Not paid yet'}</dd>
@@ -273,6 +286,8 @@ class LoanMapper {
                             
                             <dt>Previously Paid Interest:</dt>
                             <dd id="previouslyPaidInterest"> Rs ${data.PreviouslyPaidInterest}</dd>
+
+                            
                         </dl>
                     </div>
 

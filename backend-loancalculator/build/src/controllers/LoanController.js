@@ -64,6 +64,8 @@ class LoanController {
             const txns = yield loanTransactionService.getTransactions(loan.loanid);
             const transactions = new LoanTransactionMapper_1.LoanTransactionMapper().listMapper(txns);
             const dto = new LoanMapper_1.LoanMapper().detailMapper(loan, transactions);
+            const intrest = new LoanMapper_1.LoanMapper().interestMapper(loan, transactions);
+            dto.AdvancedInterestRemaining = intrest.LiableAmountRemaining;
             return res.status(200).send(dto);
         });
     }

@@ -47,8 +47,10 @@ export class LoanController {
             return res.status(404).send({ message: "Resource not found." });
         }
         const txns = await loanTransactionService.getTransactions(loan.loanid);
-        const transactions = new LoanTransactionMapper().listMapper(txns)
-        const dto = new LoanMapper().detailMapper(loan, transactions);
+        const transactions = new LoanTransactionMapper().listMapper(txns);
+        const dto: any = new LoanMapper().detailMapper(loan, transactions);
+        const intrest = new LoanMapper().interestMapper(loan, transactions);
+        dto.AdvancedInterestRemaining = intrest.LiableAmountRemaining;
         return res.status(200).send(dto);
     }
 
@@ -198,7 +200,7 @@ export class LoanController {
         const attachments = [{
             filename: filename,
             content: pdfBuffer.toString('base64'),
-            encoding:'base64'
+            encoding: 'base64'
         }];
 
         const model = {

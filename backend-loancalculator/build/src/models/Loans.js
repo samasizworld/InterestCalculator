@@ -31,7 +31,7 @@ class Loans {
                 type: sequelize_1.DataTypes.BOOLEAN
             },
             loantakendate: {
-                type: sequelize_1.DataTypes.DATE
+                type: "TIMESTAMP"
             },
             memberid: {
                 type: sequelize_1.DataTypes.INTEGER
