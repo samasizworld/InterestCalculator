@@ -11,7 +11,7 @@ const apiUrl = 'http://localhost:4400/api/v1/';
 const LoanDetail = () => {
     const { memberid, loanid } = useParams();
     const navigate = useNavigate();
-    const [loan, setLoan] = useState<any>({ Amount: "", LoanTakenDate: "" });
+    const [loan, setLoan] = useState<any>({ Amount: "", LoanTakenDate: "", AdvanceAmount: "" });
     const [transactions, setTransactions] = useState<any[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
     const [interest, setInterest] = useState<any>({});
@@ -27,7 +27,7 @@ const LoanDetail = () => {
             })
                 .then((res) => {
                     const transactions = res.data.Transactions;
-                    const { Amount, Loantakendate } = res.data;
+                    const { Amount, Loantakendate, AdvancedInterestRemaining } = res.data;
                     setTransactions(transactions);
 
 
@@ -35,7 +35,7 @@ const LoanDetail = () => {
                         setErrors(prevError => [...prevError, { PaidAmount: t.PaidAmount ? "" : "Amount cannot be empty.", PaidDate: t.PaidDate ? "" : "Date cannot be empty." }]);
                     })
                     // setErrors(Array.from({ length: transactions.length }, () => { return { PaidAmount: "", PaidDate: "" } }))
-                    setLoan({ Amount: Amount || "", LoanTakenDate: Loantakendate || "" });
+                    setLoan({ Amount: Amount || "", LoanTakenDate: Loantakendate || "", AdvanceAmount: AdvancedInterestRemaining });
                     setError({ Amount: "", LoanTakenDate: "" })
                 })
                 .catch(err => {
@@ -132,20 +132,6 @@ const LoanDetail = () => {
 
     const handleDateChange1 = (date: any) => {
         if (date) {
-            const year = new Date(date).getFullYear();
-            const month = new Date(date).getMonth() + 1;
-            const day = new Date(date).getDate();
-            // steps
-            // datepicker sends date with 00:00:00 and timezone kathmandu 
-            // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
-
-            //  inorder to fix it, i make 5:45
-            // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
-            // value = new Date(`${year}-${month}-${day} 05:45:00`);
-            date = new Date(`${year}-${month}-${day} 12:00:00`);
-        }
-
-        if (date) {
             setError((prev: any) => {
                 const updated = { ...prev };
                 updated.LoanTakenDate = '';
@@ -177,19 +163,6 @@ const LoanDetail = () => {
             });
         }
         setTransactions((prevTransactions: any[]) => {
-            if (date) {
-                const year = new Date(date).getFullYear();
-                const month = new Date(date).getMonth() + 1;
-                const day = new Date(date).getDate();
-                // steps
-                // datepicker sends date with 00:00:00 and timezone kathmandu 
-                // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
-
-                //  inorder to fix it, i make 5:45
-                // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
-                // value = new Date(`${year}-${month}-${day} 05:45:00`);
-                date = new Date(`${year}-${month}-${day} 12:00:00`);
-            }
             const updatedTransactions = [...prevTransactions];
             updatedTransactions[index] = { ...updatedTransactions[index], PaidDate: date };
             return updatedTransactions;
@@ -209,6 +182,22 @@ const LoanDetail = () => {
     const handleSave = (index: number, transactionId: string) => {
         const t = transactions[index];
         const payload = { LoanId: loanid, PaidAmount: t.PaidAmount, PaidDate: t.PaidDate };
+        let date = payload.PaidDate;
+        if (date) {
+            const year = new Date(date).getFullYear();
+            const month = new Date(date).getMonth() + 1;
+            const day = new Date(date).getDate();
+            // steps
+            // datepicker sends date with 00:00:00 and timezone kathmandu 
+            // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
+
+            //  inorder to fix it, i make 5:45
+            // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
+            // value = new Date(`${year}-${month}-${day} 05:45:00`);
+            date = new Date(`${year}-${month}-${day} 12:00:00`);
+        }
+        payload.PaidDate = date;
+        console.log(JSON.stringify(payload))
         if (parseFloat(payload.PaidAmount) <= 0) {
             toast.error('Amount cannot be 0 or negative')
             return;
@@ -237,12 +226,39 @@ const LoanDetail = () => {
                 });
         } else {
             // add
+            if (parseFloat(loan.AdvanceAmount) > 0) {
+                toast.error('Advanced Amount still remaining. Please adjust it to add new amount');
+                return;
+            }
             axios.post(`${apiUrl}loantransactions`, JSON.stringify(payload), {
                 headers: { "Content-Type": "application/json" }
             })
                 .then((res) => {
                     console.log(res.data);
                     toast.success('Record Saved');
+
+                    //  after post
+
+                    axios.get(`${apiUrl}members/${memberid}/loans/${loanid}`, {
+                        headers: { "Content-Type": "application/json" }
+                    })
+                        .then((res) => {
+                            const transactions = res.data.Transactions;
+                            const { Amount, Loantakendate, AdvancedInterestRemaining } = res.data;
+                            setTransactions(transactions);
+
+
+                            transactions.forEach((t: any) => {
+                                setErrors(prevError => [...prevError, { PaidAmount: t.PaidAmount ? "" : "Amount cannot be empty.", PaidDate: t.PaidDate ? "" : "Date cannot be empty." }]);
+                            })
+                            // setErrors(Array.from({ length: transactions.length }, () => { return { PaidAmount: "", PaidDate: "" } }))
+                            setLoan({ Amount: Amount || "", LoanTakenDate: Loantakendate || "", AdvanceAmount: AdvancedInterestRemaining });
+                            setError({ Amount: "", LoanTakenDate: "" })
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            toast.error('Internal server error');
+                        });
                 })
                 .catch(err => {
                     console.error(err);
@@ -302,6 +318,21 @@ const LoanDetail = () => {
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
+        let date = loan.LoanTakenDate;
+        if (date) {
+            const year = new Date(date).getFullYear();
+            const month = new Date(date).getMonth() + 1;
+            const day = new Date(date).getDate();
+            // steps
+            // datepicker sends date with 00:00:00 and timezone kathmandu 
+            // but in payload, it sends utc time by subtracting 5 hr:45 min which leads issue. date can be prev date
+
+            //  inorder to fix it, i make 5:45
+            // while making payload it makes utc time by subtracting 545. It makes sure date always selected date 
+            // value = new Date(`${year}-${month}-${day} 05:45:00`);
+            date = new Date(`${year}-${month}-${day} 12:00:00`);
+        }
+        loan.LoanTakenDate = date;
         if (loanid == '0') {
             axios.post(`${apiUrl}members/${memberid}/loans`, JSON.stringify(loan), {
                 headers: { "Content-Type": "application/json" }
@@ -474,11 +505,11 @@ const LoanDetail = () => {
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Due Interest Amount:</span>
-                        <span className="modal-content-value">{'Rs '}{interest.DueInterestAmount}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.DueInterestAmountRemaining}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Advanced Recieved:</span>
-                        <span className="modal-content-value">{'Rs '}{interest.LiableAmount}</span>
+                        <span className="modal-content-value">{'Rs '}{interest.LiableAmountRemaining}</span>
                     </div>
                     <div className="modal-content-row">
                         <span className="modal-content-label">Latest Paid Date:</span>

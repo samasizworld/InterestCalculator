@@ -17,7 +17,7 @@ const Calender = ({ value, handleDateChange }: any) => {
     //     console.log(value);
     // }
     return (
-        <DatePicker selected={value} onChange={handleDateChange} dateFormat={"yyyy-MM-dd"} placeholderText={"yyyy-MM-dd"} />
+        <DatePicker maxDate={new Date()} selected={value} onChange={handleDateChange} dateFormat={"yyyy-MM-dd"} placeholderText={"yyyy-MM-dd"} />
     )
 }
 
